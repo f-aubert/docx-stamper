@@ -24,9 +24,11 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
 
     private PlaceholderReplacer<Object> placeholderReplacer;
 
-    public RepeatProcessor(TypeResolverRegistry typeResolverRegistry, ExpressionResolver expressionResolver) {
+    public RepeatProcessor(TypeResolverRegistry typeResolverRegistry, ExpressionResolver expressionResolver, boolean leaveEmptyOnExpressionError, boolean replaceNullValues) {
         this.placeholderReplacer = new PlaceholderReplacer<>(typeResolverRegistry);
         this.placeholderReplacer.setExpressionResolver(expressionResolver);
+        this.placeholderReplacer.setLeaveEmptyOnExpressionError(leaveEmptyOnExpressionError);
+        this.placeholderReplacer.setReplaceNullValues(replaceNullValues);
     }
 
     @Override

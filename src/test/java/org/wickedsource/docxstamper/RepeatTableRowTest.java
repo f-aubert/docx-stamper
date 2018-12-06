@@ -68,5 +68,41 @@ public class RepeatTableRowTest extends AbstractDocx4jTest {
         Assert.assertEquals("Dan Castellaneta", new ParagraphWrapper((P) cells.get(13).getCell().getContent().get(0)).getText());
     }
 
+    @Test
+    public void testReplaceNull() throws Docx4JException, IOException {
+        CharactersContext context = new CharactersContext();
+        context.getCharacters().add(new Character("Homer Simpson", "Dan Castellaneta"));
+        context.getCharacters().add(new Character("Krusty the Clown", null));
+        InputStream template = getClass().getResourceAsStream("RepeatTableRowTest.docx");
+        WordprocessingMLPackage document = stampAndLoad(template, context, new DocxStamperConfiguration()
+                .replaceNullValues(true));
+
+        final List<TableRowCoordinates> rowCoords = new ArrayList<>();
+        CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
+            @Override
+            protected void onTableRow(TableRowCoordinates tableRowCoordinates) {
+                rowCoords.add(tableRowCoordinates);
+            }
+        };
+        walker.walk();
+
+        // 1 header row + 1 row per character in list
+        Assert.assertEquals(3, rowCoords.size());
+
+
+        final List<TableCellCoordinates> cells = new ArrayList<>();
+        CoordinatesWalker cellWalker = new BaseCoordinatesWalker(document) {
+            @Override
+            protected void onTableCell(TableCellCoordinates tableCellCoordinates) {
+                cells.add(tableCellCoordinates);
+            }
+        };
+        cellWalker.walk();
+
+        Assert.assertEquals("Homer Simpson", new ParagraphWrapper((P) cells.get(2).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("Dan Castellaneta", new ParagraphWrapper((P) cells.get(3).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("Krusty the Clown", new ParagraphWrapper((P) cells.get(4).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("", new ParagraphWrapper((P) cells.get(5).getCell().getContent().get(0)).getText());
+    }
 
 }
